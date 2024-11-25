@@ -162,6 +162,9 @@ bool ReadBufferFromS3::nextImpl()
     if (!next_result)
     {
         read_all_range_successfully = true;
+        if (read_result) {
+            read_result.reset();
+        }
         return false;
     }
 
@@ -169,6 +172,17 @@ bool ReadBufferFromS3::nextImpl()
 
     ProfileEvents::increment(ProfileEvents::ReadBufferFromS3Bytes, working_buffer.size());
     offset += working_buffer.size();
+
+    if (read_until_position)
+    {
+        if (read_until_position == offset)
+        {
+            if (read_result) {
+                read_result.reset();
+            }
+        }
+    }
+
     if (read_settings.remote_throttler)
         read_settings.remote_throttler->add(working_buffer.size(), ProfileEvents::RemoteReadThrottlerBytes, ProfileEvents::RemoteReadThrottlerSleepMicroseconds);
 
