@@ -2372,6 +2372,8 @@ def test_join_with_distributed(started_cluster):
 
     assert len(instance.query(f"with b as (select * from {table_function}) select {clickhouse_table_name}_dist.val, b.val from {clickhouse_table_name}_dist join b on {clickhouse_table_name}_dist.id = b.id;").split('\n')) == 10
     assert len(instance.query(f"with b as (select * from {table_function}) select {clickhouse_table_name}_dist.val, b.val from b join {clickhouse_table_name}_dist on {clickhouse_table_name}_dist.id = b.id;").split('\n')) == 10
+    assert len(instance.query(f"with b as (select * from {table_function_cluster}) select {clickhouse_table_name}_dist.val, b.val from {clickhouse_table_name}_dist join b on {clickhouse_table_name}_dist.id = b.id SETTINGS prefer_localhost_replica = 0").split('\n')) == 10
+    assert len(instance.query(f"with b as (select * from {table_function_cluster}) select {clickhouse_table_name}_dist.val, b.val from b join {clickhouse_table_name}_dist on {clickhouse_table_name}_dist.id = b.id SETTINGS prefer_localhost_replica = 0").split('\n')) == 10
     assert int(instance.query(f"SELECT count() FROM remote('localhost', {table_function}) SETTINGS prefer_localhost_replica = 0").strip()) == 9
 
 
