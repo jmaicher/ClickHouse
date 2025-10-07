@@ -17,6 +17,12 @@ ${CLICKHOUSE_CURL} -vsS "${URL}"ping  2>&1 | perl -lnE 'print if /Keep-Alive/' |
 # no keep-alive:
 ${CLICKHOUSE_CURL} -vsS "${URL}"404/not/found/ 2>&1 | perl -lnE 'print if /Keep-Alive/';
 
+# insert from select
+echo "insert from select"
+${CLICKHOUSE_CLIENT} -q "DROP TABLE IF EXISTS insert_from_select"
+${CLICKHOUSE_CLIENT} -q "CREATE TABLE insert_from_select (id UInt32) ENGINE = MergeTree ORDER BY id"
+${CLICKHOUSE_CURL} -vsS "${CLICKHOUSE_URL}&query_id=00408-insert_from_select" -d "INSERT INTO insert_from_select SELECT * FROM system.one"  2>&1 | grep "Connection:"
+
 # async inserts
 ${CLICKHOUSE_CLIENT} -q "DROP TABLE IF EXISTS async_inserts"
 ${CLICKHOUSE_CLIENT} -q "CREATE TABLE async_inserts (id UInt32, s String) ENGINE = MergeTree ORDER BY id"
